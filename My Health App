@@ -1,0 +1,140 @@
+# Ideal values for age group (15-20 years)
+IDEAL_STEPS = 10000
+IDEAL_WATER = 2.5      # liters
+IDEAL_WALKING = 60     # minutes
+
+
+# ---------- SAFE INPUT FUNCTIONS ----------
+def get_positive_int(prompt, min_val=0, max_val=None):
+    while True:
+        try:
+            value = int(input(prompt))
+            if value < min_val:
+                print("❌ Value must be at least", min_val)
+                continue
+            if max_val is not None and value > max_val:
+                print("❌ Value must be at most", max_val)
+                continue
+            return value
+        except ValueError:
+            print("❌ Please enter a valid whole number.")
+
+
+def get_positive_float(prompt, min_val=0, max_val=None):
+    while True:
+        try:
+            value = float(input(prompt))
+            if value < min_val:
+                print("❌ Value must be at least", min_val)
+                continue
+            if max_val is not None and value > max_val:
+                print("❌ Value must be at most", max_val)
+                continue
+            return value
+        except ValueError:
+            print("❌ Please enter a valid number.")
+
+
+# ---------- BMI FUNCTIONS ----------
+def bmi_calc(weight, height_cm):
+    height_m = height_cm / 100
+    bmi = weight / (height_m ** 2)
+    return round(bmi, 2)
+
+
+def bmi_category(bmi):
+    if bmi < 18.5:
+        return "Underweight"
+    elif bmi < 25:
+        return "Normal"
+    elif bmi < 30:
+        return "Overweight"
+    else:
+        return "Obese"
+
+
+# ---------- ACTIVITY INDEX FUNCTION ----------
+def activity_index(steps, water, walking):
+    steps_percent = steps / IDEAL_STEPS
+    water_percent = water / IDEAL_WATER
+    walking_percent = walking / IDEAL_WALKING
+
+    index = (steps_percent + water_percent + walking_percent) / 3
+    return round(index, 2)
+
+
+# ---------- USER PROFILE INPUT ----------
+print("🧍 Personal Details")
+print("------------------")
+
+gender = input("Enter gender (Male/Female/Other): ").strip()
+age = get_positive_int("Enter age: ", 1, 120)
+weight = get_positive_float("Enter weight (kg): ", 1, 500)
+height = get_positive_float("Enter height (cm): ", 50, 300)
+
+# ---------- BMI CALCULATION ----------
+bmi = bmi_calc(weight, height)
+bmi_text = bmi_category(bmi)
+
+print("\n📌 BMI RESULT")
+print("BMI =", bmi)
+print("Category =", bmi_text)
+
+
+# ---------- ACTIVITY INPUT ----------
+print("\n📊 Activity Index Calculator")
+print("----------------------------")
+
+num_days = get_positive_int("How many days of data do you want to enter? (1–30): ", 1, 30)
+
+daily_data = {}
+
+for i in range(1, num_days + 1):
+    print(f"\nEnter data for Day {i}")
+
+    steps = get_positive_int("Steps walked today: ", 0, 100000)
+    water = get_positive_float("Water intake (liters): ", 0, 20)
+    walking = get_positive_int("Walking time (minutes): ", 0, 600)
+
+    daily_data[f"Day {i}"] = (steps, water, walking)
+
+
+# ---------- CALCULATIONS ----------
+print("\n✅ Daily Activity Index:\n")
+
+results = []
+for day, data in daily_data.items():
+    index = activity_index(*data)
+    results.append(index)
+    print(day, "=", index)
+
+print("\nIdeal Activity Index = 1.0")
+
+# Arithmetic sequence of changes
+changes = []
+for i in range(1, len(results)):
+    changes.append(round(results[i] - results[i-1], 2))
+
+print("\nChange between days:")
+print(changes if changes else "Not enough days to calculate change")
+
+
+# ---------- FEEDBACK ----------
+avg_index = round(sum(results) / len(results), 2)
+print("\nAverage Activity Index =", avg_index)
+
+if avg_index >= 1:
+    print("🌟 Excellent activity level!")
+elif avg_index >= 0.8:
+    print("👍 Good — try to improve a little more.")
+else:
+    print("⚠️ Try increasing steps, water, and walking time.")
+
+
+# ---------- SUMMARY ----------
+print("\n📋 HEALTH SUMMARY")
+print("----------------")
+print("Gender:", gender)
+print("Age:", age)
+print("BMI:", bmi, f"({bmi_text})")
+print("Average Activity Index:", avg_index)
